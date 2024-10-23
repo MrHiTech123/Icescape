@@ -20,6 +20,9 @@ class GameNoun:
         self.armor_mass = armor_mass
         self.kinetic_friction = kinetic_friction
         self.static_friction = static_friction
+        
+        
+        self.do_static_friction = True
     
     def get_mass(self):
         return self.base_mass + self.armor_mass
@@ -40,20 +43,21 @@ class GameNoun:
         return atan(self.vy / self.vx)
     
     def handle_friction(self):
-        return
         velocity_mag = self.get_velocity_magnitude()
         highest_velocity_before_static_friction = self.get_static_friction_max_speed()
+        print(highest_velocity_before_static_friction)
         friction_slowdown = self.get_kinetic_friction_slowdown()
         theta = self.direction_of_velocity()
         
         
-        if highest_velocity_before_static_friction > velocity_mag:
+        if self.do_static_friction and highest_velocity_before_static_friction > velocity_mag:
             self.vx = 0
             self.vy = 0
         
         
         
-        print(self.vx, self.vy, theta, highest_velocity_before_static_friction)
+        
+        print(self.vx, self.vy, theta, highest_velocity_before_static_friction, self.do_static_friction)
         
         if self.vx > 0:
             self.vx -= friction_slowdown * cos(theta)
@@ -141,7 +145,7 @@ player = Player(
     10.0,
     base_mass=100,
     static_friction=consts.friction.ice.static,
-    kinetic_friction=consts.friction.ice.kinetic,
+    kinetic_friction=consts.friction.ice.kinetic
 )
 nouns = [player]
 
@@ -158,6 +162,14 @@ while game_going:
         
         
     keys = pygame.key.get_pressed()
+    
+    player.do_static_friction = True
+    for key in consts.move_keys:
+        if keys[key]:
+            player.do_static_friction = False
+    
+    
+    
     if keys[pygame.K_UP]:
         player.ay = -consts.acceleration
     elif keys[pygame.K_DOWN]:
